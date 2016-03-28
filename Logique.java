@@ -1,3 +1,5 @@
+package fr.p4;
+
 
 public class Logique {
 

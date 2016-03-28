@@ -1,5 +1,8 @@
+package fr.mouse.listeners;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+
+import fr.p4.Affichage;
 
 
 public class MouseListenerWindow implements MouseListener {

@@ -1,3 +1,6 @@
+package fr.mouse.listeners;
+import fr.p4.Affichage;
+
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -11,7 +14,7 @@ public class MouseListenerJouer implements MouseListener {
 	}
 
 	public void mouseClicked(MouseEvent arg0) {
-		affichage.getNames();
+		affichage.initJeu();
 	}
 
 	public void mouseEntered(MouseEvent arg0) {

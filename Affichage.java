@@ -1,7 +1,9 @@
+package fr.p4;
 import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+import fr.mouse.listeners.*;
 import acm.graphics.GLabel;
 import acm.graphics.GOval;
 import acm.graphics.GRect;
@@ -14,6 +16,7 @@ public class Affichage extends GraphicsProgram {
 	//12h --> 35min : ""
 	//14h30 --> 30 min : ""
 	//17h:30 --> 1h10 : Finalisation de la réecriture
+	//Dim 27/03 : 40 min : Brouillon : ajout chrono chaque jouer + nb coups
 
 	//Déclaration des variables 
 
@@ -133,7 +136,7 @@ public class Affichage extends GraphicsProgram {
 
 
 	//Obtenir les noms des joueurs
-	public void getNames(){
+	public void initJeu(){
 		removeAll();
 		IODialog io = getDialog();
 		j1 = io.readLine("Entrez le nom du joueur 1 (Couleur Jaune)");
