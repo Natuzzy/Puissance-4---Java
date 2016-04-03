@@ -30,12 +30,11 @@ public class Logique {
 					break; // On sort de la boucle
 				}
 			}
+			//Remplir la case vide
+			etatDuJeu.setCColor(ligne, x);
+			affichage.update();
+			verification(ligne, x);
 		}
-
-		//Remplir la case vide
-		etatDuJeu.setCColor(ligne, x);
-		affichage.update();
-		verification(ligne, x);
 	}
 
 
@@ -44,32 +43,54 @@ public class Logique {
 		//Vérification par colonne : 
 		if(compte(y, x, -1,0) >= 3){
 			System.out.println("Fin du jeu (Colonne)");
+			affichage.finDuJeu();
+			return;
 		}
 
 		//Vérification par ligne
 		if(compte(y, x, 0,+1)+compte(y,x,0,-1) >= 3){
 			System.out.println("Fin du jeu (ligne)");
+			affichage.finDuJeu();
+			return;
 		}
 
 		//Vérification diagonal haut
 		if(compte(y, x, +1,+1)+compte(y,x,-1,-1) >= 3){
 			System.out.println("Fin du jeu (Diagonal haut)");
+			affichage.finDuJeu();
+			return;
 		}
 
 		//Vérification diagonal bas
 		if(compte(y,x, -1,+1)+compte(y,x, +1,-1) >= 3){
 			System.out.println("Fin du jeu (Diagonal bas)");
+			affichage.finDuJeu();
+			return;
 		}
 
 		//Vérifier si la grille est pleine (sans vainqueur)
-		if(compte(Config.NB_LIGNES-1,0, 0,+1) == 6){
-			System.out.println("Pas de vainqueur");
-		} 
-		etatDuJeu.setCActuelle();
-		etatDuJeu.setJActuelle();
+		int i = 0;
+		int compteur =0;
+			while(i < Config.NB_COLONNES && etatDuJeu.getCColor(Config.NB_LIGNES-1, i) != Config.colorVide){
+				compteur++;
+				i++;
+				if(compteur == 7){
+					System.out.println("Pas de gagnant");
+				}
+			} 
+		
+		//Changement de joueur
+		if(etatDuJeu.getCActuelle() == Config.colorJ1){
+			etatDuJeu.setCActuelle(Config.colorJ2);
+			etatDuJeu.setJActuelle(etatDuJeu.getJ2());
+		}else{
+			etatDuJeu.setCActuelle(Config.colorJ1);
+			etatDuJeu.setJActuelle(etatDuJeu.getJ1());
+		}
+		
+		//Mettre à jour l'affichage
 		affichage.update();
 	}
-
 	//Compter les pions aligné dans la direction indiqué
 	public int compte(int y, int x, int dirLigne, int dirColonne){
 		int compteur = 0;
@@ -83,9 +104,6 @@ public class Logique {
 			ligne = ligne + dirLigne;
 			System.out.println("Bonjour, ligne : "+ligne+", colonne :"+colonne+", compteur :"+compteur);
 		}
-		//}
-
-
 		return compteur;	
 	}
 }

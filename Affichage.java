@@ -1,7 +1,10 @@
 package fr.p4;
 import java.awt.Color;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Scanner;
 
 import fr.mouse.listeners.*;
 import acm.graphics.GLabel;
@@ -17,6 +20,7 @@ public class Affichage extends GraphicsProgram {
 	//14h30 --> 30 min : ""
 	//17h:30 --> 1h10 : Finalisation de la réecriture
 	//Dim 27/03 : 40 min : Brouillon : ajout chrono chaque jouer + nb coups
+	//2h --> sauvegarde / fichier
 
 	//Déclaration des variables 
 
@@ -29,6 +33,8 @@ public class Affichage extends GraphicsProgram {
 	private GLabel jActuelle; 
 	private GRect cActuelle;
 	private GOval[][] grille = new GOval[Config.NB_LIGNES][Config.NB_COLONNES];
+
+	private String fSave = "save.txt";
 
 	//Fin des declaration de variable
 
@@ -53,6 +59,9 @@ public class Affichage extends GraphicsProgram {
 		//Obtention des dimensions de la fenêtre
 		double hauteur = getHeight();
 		double largeur = getWidth();
+		long font = Math.round(largeur/12);
+		System.out.println(font);
+		removeAll();
 
 		//JOUER
 		GRect cJouer = new GRect(largeur/2, hauteur/5);
@@ -61,7 +70,7 @@ public class Affichage extends GraphicsProgram {
 		cJouer.setFillColor(Color.green);
 		cJouer.addMouseListener(new MouseListenerJouer(this));
 		GLabel tJouer = new GLabel("Jouer");
-		tJouer.setFont("Comic Sans MS-40");
+		tJouer.setFont("Comic Sans MS-"+font);
 		tJouer.setLocation(largeur/2-tJouer.getWidth()/2, hauteur/5-tJouer.getHeight()/2);
 		add(cJouer);
 		add(tJouer);
@@ -74,7 +83,7 @@ public class Affichage extends GraphicsProgram {
 		cQuitter.addMouseListener(new MouseListenerQuitter());
 		GLabel tQuitter = new GLabel("Quitter");
 		tQuitter.setFont("Comic Sans MS-40");
-		tQuitter.setLocation(cQuitter.getX()+tQuitter.getWidth()/2, cQuitter.getY()+tQuitter.getHeight()/2);
+		tQuitter.setLocation(cQuitter.getX()+cQuitter.getWidth()/2-tQuitter.getWidth()/2, cQuitter.getY()+cQuitter.getHeight()/2);
 		add(cQuitter);
 		add(tQuitter);	
 	}
@@ -86,14 +95,7 @@ public class Affichage extends GraphicsProgram {
 		double hauteur = getHeight();
 		double largeur = getWidth();
 
-
-		//System de redimensionnement automatique de la fenêtre
-		GRect fenetre = new GRect(0,0,largeur,hauteur); 		// Rectangle qui rempli toute la fenêtre
-		fenetre.setVisible(false); 								// Pas besoin de voir le rectangle
-		fenetre.sendBackward(); 								// l'envoyer derrier les autres GObject
-		fenetre.addMouseListener(new MouseListenerWindow(this));
-		add(fenetre);
-
+		addMouseListeners();//Ajout de lecture de la souris pour redimensionner auto le plateau
 
 		//Afficher la grille de jeu
 		for(int x=0; x < Config.NB_COLONNES; x++){ 						//Pour chaque colonne on fait :
@@ -117,6 +119,8 @@ public class Affichage extends GraphicsProgram {
 		//Nom du joueur actuelle
 		jActuelle = new GLabel(""+etatDuJeu.getJActuelle(), largeur*7/8, hauteur*2/8);
 		add(jActuelle);	
+
+
 	}
 
 
@@ -129,7 +133,7 @@ public class Affichage extends GraphicsProgram {
 			}
 		}
 
-		//TODO : Mettre à jour le joueur qui doit joeur
+		//Mettre à jour le joueur qui doit joueur
 		cActuelle.setFillColor(etatDuJeu.getCActuelle());
 		jActuelle.setLabel(""+etatDuJeu.getJActuelle());
 	}
@@ -143,11 +147,113 @@ public class Affichage extends GraphicsProgram {
 		j2 = io.readLine("Entrez le nom du joueur 2 (Couleur Rouge)");
 		etatDuJeu.setJ1(j1);
 		etatDuJeu.setJ2(j2);
-		etatDuJeu.setJActuelleDebut();
+		etatDuJeu.setJActuelle(j1);
 		plateau();
 	}
 
 
+	//Fin du jeu
+	public void finDuJeu() {
+		double hauteur = getHeight();
+		double largeur = getWidth();
+
+		String winner = etatDuJeu.getJActuelle();
+
+		removeAll();
+		GLabel win = new GLabel("Le vainqueur est : "+winner);
+		win.setLocation(largeur/2-win.getWidth(), hauteur/5-win.getHeight());
+		add(win);
+
+		GRect rejouer = new GRect(largeur/5, hauteur/5);
+		rejouer.setLocation(largeur*2/5-rejouer.getWidth(), hauteur*3/5-rejouer.getHeight());
+		rejouer.addMouseListener(new MouseListenerReJouer(this));
+		add(rejouer);
+
+	}
+
+	
+	//Redimensionner le plateau si la souris entre dans la fenêtre
+	public void mouseEntered(MouseEvent e){
+		plateau();
+	}
 
 
+	//Création de sauvegarde de la partie
+	public void saveJeu(){
+		try{
+			PrintWriter fSortie = new PrintWriter(fSave);
+			fSortie.println(etatDuJeu.getJ1());
+			fSortie.println(etatDuJeu.getJ2());
+			if(etatDuJeu.getCActuelle() == Config.colorJ1){
+				fSortie.println(1);
+			}
+			else{
+				fSortie.println(2);
+			}
+
+			for(int y = 0; y < Config.NB_LIGNES; y++){
+				for(int x = 0; x < Config.NB_COLONNES; x++){
+					fSortie.println(saveCase(y,x));
+				}
+			}
+
+			fSortie.close();
+		} catch (IOException e){
+			println("Erreur Traitement fichier "+ e);
+		}
+	}
+	//Transformer la couleur de la case souhaité en un nombre
+	private int saveCase(int y, int x) {
+		int sCase;
+		if(etatDuJeu.getCColor(y, x) == Config.colorJ1){
+			sCase = 1;
+		}
+		else if(etatDuJeu.getCColor(y, x) == Config.colorJ2){
+			sCase = 2;
+		}
+		else{
+			sCase = 0;
+		}
+		return sCase;
+	}
+	
+	//Récuperé la sauvegarde
+	private void recupSave() {
+		File fichier = new File(fSave);
+		try{
+			Scanner fEntree = new Scanner(fichier);
+			
+			//Définir le nom des deux joueurs
+			String ligne = fEntree.nextLine();
+			etatDuJeu.setJ1(ligne);
+			ligne = fEntree.nextLine();
+			etatDuJeu.setJ2(ligne);			
+			
+			//Definir la couleur de chaque case
+			for(int y = 0; y < Config.NB_LIGNES; y++){
+				for(int x = 0; x < Config.NB_COLONNES; x++){
+					int line = fEntree.nextInt();
+					etatDuJeu.setCActuelle(recupColor(line));
+					etatDuJeu.setCColor(y, x);
+				}
+			}
+			fEntree.close();
+		}catch(IOException e){
+			println("Erreur ouverture fichier : "+e);
+		}
+	}
+	//Transformer chaque nombre en couleur
+	public Color recupColor(int nb){
+		Color color;
+		if(nb == 1){
+			color = Config.colorJ1;
+		}
+		else if(nb == 2){
+			color = Config.colorJ2;
+		}
+		else{
+			color =	Config.colorVide;
+		}
+		return color;
+	}
 }

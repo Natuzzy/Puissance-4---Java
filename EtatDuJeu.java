@@ -27,15 +27,9 @@ public class EtatDuJeu {
 
 
 	//Définir la couleur du joueur actuelle
-	public void setCActuelle(){
-		if(cActuelle == Config.colorJ1){
-			cActuelle = Config.colorJ2;
-		}
-		else{
-			cActuelle = Config.colorJ1;
-		}
+	public void setCActuelle(Color color){
+		cActuelle = color;
 	}
-
 	//Renvoie de la couleur du joueur actuelle
 	public Color getCActuelle(){
 		return cActuelle;
@@ -50,18 +44,19 @@ public class EtatDuJeu {
 	public void setJ2(String j2){
 		this.j2 = j2;
 	}
-	//Définir le nom du joueur initiale
-	public void setJActuelleDebut(){
-		jActuelle = j1;
+	
+	//Obtenir le nom du joueur 1
+	public String getJ1() {
+		return j1;
 	}
+	//Obtenir le nom du joueur 2
+	public String getJ2() {
+		return j2;
+	}
+	
 	//Définir le nom du joueur actuelle
-	public void setJActuelle(){
-		if(jActuelle == j1){
-			jActuelle = j2;
-		}
-		else{
-			jActuelle = j1;
-		}
+	public void setJActuelle(String j){
+			jActuelle = j;
 	}
 	//Obtenir le nom du joueur actuelle
 	public String getJActuelle(){
@@ -78,5 +73,4 @@ public class EtatDuJeu {
 	public void setCColor(int y, int x){
 		cColor[y][x] = cActuelle;
 	}
-
 }
