@@ -81,9 +81,11 @@ public class Logique {
 		
 		//Changement de joueur
 		if(etatDuJeu.getCActuelle() == Config.colorJ1){
+			etatDuJeu.setCJ1(etatDuJeu.getCJ1()+1);
 			etatDuJeu.setCActuelle(Config.colorJ2);
 			etatDuJeu.setJActuelle(etatDuJeu.getJ2());
 		}else{
+			etatDuJeu.setCJ2(etatDuJeu.getCJ2()+1);
 			etatDuJeu.setCActuelle(Config.colorJ1);
 			etatDuJeu.setJActuelle(etatDuJeu.getJ1());
 		}

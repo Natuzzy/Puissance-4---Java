@@ -20,7 +20,8 @@ public class Affichage extends GraphicsProgram {
 	//14h30 --> 30 min : ""
 	//17h:30 --> 1h10 : Finalisation de la réecriture
 	//Dim 27/03 : 40 min : Brouillon : ajout chrono chaque jouer + nb coups
-	//2h --> sauvegarde / fichier
+	//Ven/sam 1/2 -04 : 2h --> sauvegarde / fichier
+	//lun 04 : 20h50 --> ~30 min : poffinnement + nb coup des joueurs
 
 	//Déclaration des variables 
 
@@ -29,6 +30,10 @@ public class Affichage extends GraphicsProgram {
 
 	private String j1; 
 	private String j2;
+	private GLabel timeJ1;
+	private GLabel timeJ2;
+	private GLabel coupJ1;
+	private GLabel coupJ2;
 
 	private GLabel jActuelle; 
 	private GRect cActuelle;
@@ -116,6 +121,18 @@ public class Affichage extends GraphicsProgram {
 		cActuelle.setFilled(true);
 		cActuelle.setFillColor(etatDuJeu.getCActuelle());
 		add(cActuelle);
+		
+		
+		timeJ1.setLocation(largeur*8/9, hauteur*3/9);
+		add(timeJ1);
+		timeJ2.setLocation(largeur*8/9, hauteur*5/9);
+		add(timeJ2);
+		
+		coupJ1 = new GLabel("Nb coup J1 : "+etatDuJeu.getCJ1(),largeur*7.7/9, hauteur*3.5/9);
+		add(coupJ1);
+		coupJ2 = new GLabel("Nb coup J2 : "+etatDuJeu.getCJ2(),largeur*7.7/9, hauteur*5.5/9);
+		add(coupJ2);
+		
 		//Nom du joueur actuelle
 		jActuelle = new GLabel(""+etatDuJeu.getJActuelle(), largeur*7/8, hauteur*2/8);
 		add(jActuelle);	
@@ -134,6 +151,9 @@ public class Affichage extends GraphicsProgram {
 		}
 
 		//Mettre à jour le joueur qui doit joueur
+		coupJ1.setLabel("Nb coup J1 : "+etatDuJeu.getCJ1());
+		coupJ2.setLabel("Nb coup J2 : "+etatDuJeu.getCJ2());
+		
 		cActuelle.setFillColor(etatDuJeu.getCActuelle());
 		jActuelle.setLabel(""+etatDuJeu.getJActuelle());
 	}
@@ -148,7 +168,13 @@ public class Affichage extends GraphicsProgram {
 		etatDuJeu.setJ1(j1);
 		etatDuJeu.setJ2(j2);
 		etatDuJeu.setJActuelle(j1);
+		stats();
 		plateau();
+	}
+	//Initialisation des statistiques
+	private void stats() {
+		timeJ1 = new GLabel("0:0");
+		timeJ2 = new GLabel("0:0");
 	}
 
 
@@ -227,7 +253,10 @@ public class Affichage extends GraphicsProgram {
 			String ligne = fEntree.nextLine();
 			etatDuJeu.setJ1(ligne);
 			ligne = fEntree.nextLine();
-			etatDuJeu.setJ2(ligne);			
+			etatDuJeu.setJ2(ligne);		
+			
+			//Joueur actuelle
+			int jAct = fEntree.nextInt();
 			
 			//Definir la couleur de chaque case
 			for(int y = 0; y < Config.NB_LIGNES; y++){
@@ -237,6 +266,14 @@ public class Affichage extends GraphicsProgram {
 					etatDuJeu.setCColor(y, x);
 				}
 			}
+			
+			if(jAct == 1){
+				etatDuJeu.setCActuelle(Config.colorJ1);
+			}
+			else{
+				etatDuJeu.setCActuelle(Config.colorJ2);
+			}
+			
 			fEntree.close();
 		}catch(IOException e){
 			println("Erreur ouverture fichier : "+e);
@@ -256,4 +293,7 @@ public class Affichage extends GraphicsProgram {
 		}
 		return color;
 	}
+	
+	
+	//Affichage des chronos	
 }

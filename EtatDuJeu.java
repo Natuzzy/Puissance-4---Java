@@ -10,6 +10,8 @@ public class EtatDuJeu {
 	private String jActuelle;
 	private String j1;
 	private String j2;
+	private int coupJ1 = 0;
+	private int coupJ2 = 0;
 
 	//Initialisation de l'état du jeu
 	public EtatDuJeu(){
@@ -72,5 +74,22 @@ public class EtatDuJeu {
 	//Définir la couleur de la case cColor[y][x]
 	public void setCColor(int y, int x){
 		cColor[y][x] = cActuelle;
+	}
+	
+	
+	//Nombre de coup du joueur 1 :
+	public void setCJ1(int nb){
+		coupJ1 = nb;
+	}
+	public int getCJ1(){
+		return coupJ1;
+	}
+	
+	//Nombre de coup du joueur 2 :
+	public void setCJ2(int nb){
+		coupJ2 = nb;
+	}
+	public int getCJ2(){
+		return coupJ2;
 	}
 }
