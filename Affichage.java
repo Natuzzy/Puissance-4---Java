@@ -1,11 +1,9 @@
 package fr.p4;
 import java.awt.Color;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Scanner;
 
+import fr.chrono.ChronoJ1;
+import fr.chrono.ChronoJ2;
 import fr.mouse.listeners.*;
 import acm.graphics.GLabel;
 import acm.graphics.GOval;
@@ -27,6 +25,8 @@ public class Affichage extends GraphicsProgram {
 
 	private EtatDuJeu etatDuJeu = new EtatDuJeu(); //Lancement de la class EtatDuJeu stocké dans etatDuJeu
 	private Logique logique = new Logique(); // Lancement de la class Logique stocké dans logique
+	private ChronoJ1 chronoJ1;
+	private ChronoJ2 chronoJ2;
 
 	private String j1; 
 	private String j2;
@@ -39,7 +39,6 @@ public class Affichage extends GraphicsProgram {
 	private GRect cActuelle;
 	private GOval[][] grille = new GOval[Config.NB_LIGNES][Config.NB_COLONNES];
 
-	private String fSave = "save.txt";
 
 	//Fin des declaration de variable
 
@@ -50,10 +49,14 @@ public class Affichage extends GraphicsProgram {
 	//Initialisation du jeu
 	public void run(){
 		//Mise à zéro et initialisation des class
+		chronoJ1 = new ChronoJ1();
+		chronoJ2 = new ChronoJ2();
+		chronoJ1.init(this);
+		chronoJ2.init(this);
+		
 		etatDuJeu = new EtatDuJeu();
 		logique = new Logique();
-		logique.init(etatDuJeu, this);
-
+		logique.init(etatDuJeu, this, chronoJ1, chronoJ2);
 		//Lancement du menu
 		menu();
 	}
@@ -65,15 +68,19 @@ public class Affichage extends GraphicsProgram {
 		double hauteur = getHeight();
 		double largeur = getWidth();
 		long font = Math.round(largeur/12);
-		System.out.println(font);
 		removeAll();
-
-		//JOUER
+	
+		//Continuer la partie
+		GRect continuer = new GRect(10,10,100,100);
+		continuer.addMouseListener(new MouseListenerContinuer(logique));
+		add(continuer);
+		
+		//Nouvelle partie
 		GRect cJouer = new GRect(largeur/2, hauteur/5);
 		cJouer.setLocation(largeur/2-cJouer.getWidth()/2, hauteur/5-cJouer.getHeight()/2);
 		cJouer.setFilled(true);
 		cJouer.setFillColor(Color.green);
-		cJouer.addMouseListener(new MouseListenerJouer(this));
+		cJouer.addMouseListener(new MouseListenerNewGame(this));
 		GLabel tJouer = new GLabel("Jouer");
 		tJouer.setFont("Comic Sans MS-"+font);
 		tJouer.setLocation(largeur/2-tJouer.getWidth()/2, hauteur/5-tJouer.getHeight()/2);
@@ -99,6 +106,7 @@ public class Affichage extends GraphicsProgram {
 		removeAll();
 		double hauteur = getHeight();
 		double largeur = getWidth();
+		long police = Math.round(largeur/18);
 
 		addMouseListeners();//Ajout de lecture de la souris pour redimensionner auto le plateau
 
@@ -137,6 +145,38 @@ public class Affichage extends GraphicsProgram {
 		jActuelle = new GLabel(""+etatDuJeu.getJActuelle(), largeur*7/8, hauteur*2/8);
 		add(jActuelle);	
 
+		
+		//Bouton rejouer
+		GRect gRejouer = new GRect(0,0,largeur/3.81,hauteur/8);
+		gRejouer.setFilled(true);
+		gRejouer.setFillColor(Color.gray);		
+		gRejouer.addMouseListener(new MouseListenerReJouer(this));
+		add(gRejouer);
+		//text "rejouer"
+		GLabel rejouer = new GLabel ("REJOUER",largeur/95.25,3*hauteur/32);
+		rejouer.setFont("Serif-"+police);
+		add(rejouer);
+		
+		//bouton aide
+		GRect help = new GRect(largeur/3.81,0,largeur/3.81,hauteur/8);
+		help.setFilled(true);
+		help.setFillColor(Color.gray);
+		add(help);		
+		//texte "aide"
+		GLabel aide = new GLabel ("AIDE",6.25*largeur/19.05,3*hauteur/32);
+		aide.setFont("Serif-"+police);
+		add(aide);
+		
+		//Bouton quitter
+		GRect gQuitter = new GRect(2*largeur/3.81,0,largeur/3.81,hauteur/8);
+		gQuitter.setFilled(true);
+		gQuitter.setFillColor(Color.gray);
+		gQuitter.addMouseListener(new MouseListenerMQuitter(logique));
+		add(gQuitter);
+		//Texte quitter
+		GLabel quitter = new GLabel ("QUITTER",29*largeur/53.34,3*hauteur/32);
+		quitter.setFont("Serif-" + police);
+		add(quitter);
 
 	}
 
@@ -170,9 +210,10 @@ public class Affichage extends GraphicsProgram {
 		etatDuJeu.setJActuelle(j1);
 		stats();
 		plateau();
+		chronoJ1.startChronoJ1();
 	}
 	//Initialisation des statistiques
-	private void stats() {
+	public void stats() {
 		timeJ1 = new GLabel("0:0");
 		timeJ2 = new GLabel("0:0");
 	}
@@ -203,97 +244,13 @@ public class Affichage extends GraphicsProgram {
 		plateau();
 	}
 
-
-	//Création de sauvegarde de la partie
-	public void saveJeu(){
-		try{
-			PrintWriter fSortie = new PrintWriter(fSave);
-			fSortie.println(etatDuJeu.getJ1());
-			fSortie.println(etatDuJeu.getJ2());
-			if(etatDuJeu.getCActuelle() == Config.colorJ1){
-				fSortie.println(1);
-			}
-			else{
-				fSortie.println(2);
-			}
-
-			for(int y = 0; y < Config.NB_LIGNES; y++){
-				for(int x = 0; x < Config.NB_COLONNES; x++){
-					fSortie.println(saveCase(y,x));
-				}
-			}
-
-			fSortie.close();
-		} catch (IOException e){
-			println("Erreur Traitement fichier "+ e);
-		}
-	}
-	//Transformer la couleur de la case souhaité en un nombre
-	private int saveCase(int y, int x) {
-		int sCase;
-		if(etatDuJeu.getCColor(y, x) == Config.colorJ1){
-			sCase = 1;
-		}
-		else if(etatDuJeu.getCColor(y, x) == Config.colorJ2){
-			sCase = 2;
-		}
-		else{
-			sCase = 0;
-		}
-		return sCase;
-	}
-	
-	//Récuperé la sauvegarde
-	private void recupSave() {
-		File fichier = new File(fSave);
-		try{
-			Scanner fEntree = new Scanner(fichier);
-			
-			//Définir le nom des deux joueurs
-			String ligne = fEntree.nextLine();
-			etatDuJeu.setJ1(ligne);
-			ligne = fEntree.nextLine();
-			etatDuJeu.setJ2(ligne);		
-			
-			//Joueur actuelle
-			int jAct = fEntree.nextInt();
-			
-			//Definir la couleur de chaque case
-			for(int y = 0; y < Config.NB_LIGNES; y++){
-				for(int x = 0; x < Config.NB_COLONNES; x++){
-					int line = fEntree.nextInt();
-					etatDuJeu.setCActuelle(recupColor(line));
-					etatDuJeu.setCColor(y, x);
-				}
-			}
-			
-			if(jAct == 1){
-				etatDuJeu.setCActuelle(Config.colorJ1);
-			}
-			else{
-				etatDuJeu.setCActuelle(Config.colorJ2);
-			}
-			
-			fEntree.close();
-		}catch(IOException e){
-			println("Erreur ouverture fichier : "+e);
-		}
-	}
-	//Transformer chaque nombre en couleur
-	public Color recupColor(int nb){
-		Color color;
-		if(nb == 1){
-			color = Config.colorJ1;
-		}
-		else if(nb == 2){
-			color = Config.colorJ2;
-		}
-		else{
-			color =	Config.colorVide;
-		}
-		return color;
-	}
-	
 	
 	//Affichage des chronos	
+	public void updateChronoJ1(int minute, int seconde) {
+		timeJ1.setLabel(minute+":"+seconde);
+	}
+	
+	public void updateChronoJ2(int minute, int seconde){
+		timeJ2.setLabel(minute+":"+seconde);
+	}
 }
