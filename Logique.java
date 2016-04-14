@@ -31,7 +31,7 @@ public class Logique {
 
 
 	//Définir le jeton selectionné
-	public void setJeton(int y, int x){
+	public void setJeton(int x){
 
 		int dLigne = Config.NB_LIGNES-1; //Dernière ligne d'une colonne
 		int ligne = 0;
@@ -46,7 +46,7 @@ public class Logique {
 					break; // On sort de la boucle
 				}
 			}
-			//Remplir la case vide
+			//Remplir la case vide et verifier si il y a un vainqueur
 			etatDuJeu.setCColor(ligne, x);
 			affichage.update();
 			verification(ligne, x);
@@ -58,35 +58,31 @@ public class Logique {
 	private void verification(int y, int x) {
 		//Vérification par colonne : 
 		if(compte(y, x, -1,0) >= 3){
-			System.out.println("Fin du jeu (Colonne)");
 			affichage.finDuJeu();
 			return;
 		}
 
 		//Vérification par ligne
 		if(compte(y, x, 0,+1)+compte(y,x,0,-1) >= 3){
-			System.out.println("Fin du jeu (ligne)");
 			affichage.finDuJeu();
 			return;
 		}
 
 		//Vérification diagonal haut
 		if(compte(y, x, +1,+1)+compte(y,x,-1,-1) >= 3){
-			System.out.println("Fin du jeu (Diagonal haut)");
 			affichage.finDuJeu();
 			return;
 		}
 
 		//Vérification diagonal bas
 		if(compte(y,x, -1,+1)+compte(y,x, +1,-1) >= 3){
-			System.out.println("Fin du jeu (Diagonal bas)");
 			affichage.finDuJeu();
 			return;
 		}
 
 		//Vérifier si la grille est pleine (sans vainqueur)
 		int i = 0;
-		int compteur =0;
+		int compteur =1;
 			while(i < Config.NB_COLONNES && etatDuJeu.getCColor(Config.NB_LIGNES-1, i) != Config.colorVide){
 				compteur++;
 				i++;
@@ -120,11 +116,10 @@ public class Logique {
 		int ligne = y+dirLigne;
 
 		//if(colonne >= 0 && colonne < Config.NB_COLONNES && ligne >= 0 && ligne < Config.NB_LIGNES){
-		while(ligne >= 0 && colonne >= 0 && colonne < Config.NB_COLONNES && ligne < Config.NB_LIGNES && etatDuJeu.getCColor(y, x) == etatDuJeu.getCColor(ligne, colonne) &&  etatDuJeu.getCColor(ligne, colonne) != Config.colorVide){
+		while(ligne >= 0 && colonne >= 0 && colonne < Config.NB_COLONNES && ligne < Config.NB_LIGNES && etatDuJeu.getCColor(y, x) == etatDuJeu.getCColor(ligne, colonne)){
 			compteur++;
 			colonne = colonne + dirColonne;
 			ligne = ligne + dirLigne;
-			System.out.println("Bonjour, ligne : "+ligne+", colonne :"+colonne+", compteur :"+compteur);
 		}
 		return compteur;	
 	}
@@ -134,19 +129,28 @@ public class Logique {
 	public void saveJeu(){
 		try{
 			PrintWriter fSortie = new PrintWriter(fSave);
+			
+			//Sauvegarde du nom des joueurs
 			fSortie.println(etatDuJeu.getJ1());
 			fSortie.println(etatDuJeu.getJ2());
 			
+			//Sauvegarde du nombre de coup de chaque joueur
 			fSortie.println(etatDuJeu.getCJ1());
 			fSortie.println(etatDuJeu.getCJ2());
 			
+			//Sauvegarde du chrono des deux joueur
+			fSortie.println(chronoJ1.getTempsJ1());
+			fSortie.println(chronoJ2.getTempsJ2());
+
+			//Sauvegarde du joueur actuelle
 			if(etatDuJeu.getCActuelle() == Config.colorJ1){
 				fSortie.println(1);
 			}
 			else{
 				fSortie.println(2);
 			}
-
+			
+			//Sauvegarde du plateau
 			for(int y = 0; y < Config.NB_LIGNES; y++){
 				for(int x = 0; x < Config.NB_COLONNES; x++){
 					fSortie.println(saveCase(y,x));
@@ -185,12 +189,20 @@ public class Logique {
 			ligne = fEntree.nextLine();
 			etatDuJeu.setJ2(ligne);		
 			
-			int jAct = fEntree.nextInt();
-			
+			//Récuperer leurs nombre de coup
 			int line = fEntree.nextInt();
 			etatDuJeu.setCJ1(line);
 			line = fEntree.nextInt();
 			etatDuJeu.setCJ2(line);
+			
+			//Recuperer leur chrono
+			line = fEntree.nextInt();			
+			chronoJ1.setTempsJ1(line);
+			line = fEntree.nextInt();
+			chronoJ2.setTempsJ2(line);
+			
+			//Récuperer le joueur actuelle
+			int jAct = fEntree.nextInt();
 			
 			//Definir la couleur de chaque case
 			for(int y = 0; y < Config.NB_LIGNES; y++){
@@ -201,13 +213,16 @@ public class Logique {
 				}
 			}
 			
+			//Définir le joueur actuelle
 			if(jAct == 1){
 				etatDuJeu.setCActuelle(Config.colorJ1);
 				etatDuJeu.setJActuelle(etatDuJeu.getJ1());
+				chronoJ1.startChronoJ1();
 			}
 			else{
 				etatDuJeu.setCActuelle(Config.colorJ2);
 				etatDuJeu.setJActuelle(etatDuJeu.getJ2());
+				chronoJ2.startChronoJ2();
 			}
 			
 			fEntree.close();

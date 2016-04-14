@@ -20,6 +20,8 @@ public class Affichage extends GraphicsProgram {
 	//Dim 27/03 : 40 min : Brouillon : ajout chrono chaque jouer + nb coups
 	//Ven/sam 1/2 -04 : 2h --> sauvegarde / fichier
 	//lun 04 : 20h50 --> ~30 min : poffinnement + nb coup des joueurs
+	//mardi 05 : 1h30 : avancement sur la savegarde + de la recup
+	//dim 10 : 1h : fin de la recup § sauvegarde + fin des commentaires
 
 	//Déclaration des variables 
 
@@ -214,8 +216,8 @@ public class Affichage extends GraphicsProgram {
 	}
 	//Initialisation des statistiques
 	public void stats() {
-		timeJ1 = new GLabel("0:0");
-		timeJ2 = new GLabel("0:0");
+		timeJ1 = new GLabel(chronoJ1.getMin()+":"+chronoJ1.getSec());
+		timeJ2 = new GLabel(chronoJ2.getMin()+":"+chronoJ2.getSec());
 	}
 
 
@@ -225,6 +227,9 @@ public class Affichage extends GraphicsProgram {
 		double largeur = getWidth();
 
 		String winner = etatDuJeu.getJActuelle();
+		
+		chronoJ1.stopChronoJ1();
+		chronoJ2.stopChronoJ2();
 
 		removeAll();
 		GLabel win = new GLabel("Le vainqueur est : "+winner);
@@ -246,11 +251,11 @@ public class Affichage extends GraphicsProgram {
 
 	
 	//Affichage des chronos	
-	public void updateChronoJ1(int minute, int seconde) {
-		timeJ1.setLabel(minute+":"+seconde);
+	public void updateChronoJ1(int minuteJ1, int secondeJ1) {
+		timeJ1.setLabel(minuteJ1+":"+secondeJ1);
 	}
 	
-	public void updateChronoJ2(int minute, int seconde){
-		timeJ2.setLabel(minute+":"+seconde);
+	public void updateChronoJ2(int minuteJ2, int secondeJ2){
+		timeJ2.setLabel(minuteJ2+":"+secondeJ2);
 	}
 }

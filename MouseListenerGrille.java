@@ -18,7 +18,7 @@ public class MouseListenerGrille implements MouseListener {
 	}
 
 	public void mouseClicked(MouseEvent arg0) {
-		logique.setJeton(y, x);
+		logique.setJeton(x);
 	}
 
 	public void mouseEntered(MouseEvent arg0) {
